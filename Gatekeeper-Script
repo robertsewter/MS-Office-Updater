@@ -1,0 +1,27 @@
+#!/bin/bash
+
+osVersion=$(sw_vers -productVersion | awk -F. '{print $2}') #Gets OS Version
+
+if [[ ${osVersion} -lt 7 ]]; then
+  echo "Gatekeeper is Not Available for This Version of MacOS"
+fi
+
+
+if [[ ${osVersion} -ge 7 ]]; then #10.7 or older
+    gatekeeper_status=`spctl --status | awk '/assessments/ {print $2}'` #Get status of gatekeeper
+   if [ $gatekeeper_status = "disabled" ]; then
+      sudo spctl --master-enable #enable gatekeeper
+   else
+      sudo spctl --master-disable #disable gatekeeper
+   fi
+fi
+
+if [[ ${osVersion} -ge 7 ]]; then
+    gatekeeper_status=`spctl --status | awk '/assessments/ {print $2}'` #post modify check
+   if [ $gatekeeper_status = "disabled" ]; then
+      result="Gatekeeper is disabled"
+   else
+      result="Gatekeeper is enabled"
+   fi
+   echo $result
+fi
